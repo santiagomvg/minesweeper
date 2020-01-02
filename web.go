@@ -19,7 +19,7 @@ func getWebGame(w http.ResponseWriter, r *http.Request, forceNew bool) *game {
 		defer boardLock.RUnlock()
 
 		bg, exists := gameBoards[c.Value]
-		if exists {
+		if exists && bg.isValid() {
 			return &bg
 		} else {
 			return createNewWebGame(w, 10, 10, 3)

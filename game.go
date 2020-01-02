@@ -27,6 +27,10 @@ type game struct {
 	board     gameGrid
 }
 
+func (g game) isValid() bool {
+	return g.startTime.Add(g.limit).After(time.Now())
+}
+
 func (g game) stream(out io.Writer) {
 	clBoard := clientBoard{board: g.board, expiresIn: g.limit}
 	if err := json.NewEncoder(out).Encode(clBoard); err != nil {
