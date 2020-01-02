@@ -25,6 +25,7 @@ type game struct {
 	startTime time.Time
 	limit     time.Duration
 	board     gameGrid
+	gameOver  bool
 }
 
 func (g game) isValid() bool {
@@ -40,6 +41,20 @@ func (g game) stream(out io.Writer) {
 
 func (g game) clearCell(x int, y int) {
 
+	if g.board[x][y].hasMine {
+		g.endGame()
+	}
+}
+
+func (g game) endGame() {
+	g.gameOver = true
+	for _, row := range g.board {
+		for _, col := range row {
+			if col.hasMine {
+				col.flags = Mine
+			}
+		}
+	}
 }
 
 func (g game) markCell(x int, y int) {
@@ -64,6 +79,7 @@ const SevenAdjacentMines cellAttr = 7
 const EightAdjacentMines cellAttr = 8
 const Uncleared cellAttr = 9
 const UnclearedAndMarked cellAttr = 10
+const Mine cellAttr = 11 //for GameOver display
 
 //this is the board sent to the client. it has no mines information to avoid cheating
 type clientBoard struct {
