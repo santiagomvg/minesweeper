@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
 	"math"
 	"math/rand"
 	"net/http"
@@ -25,6 +27,13 @@ type game struct {
 	board     gameGrid
 }
 
+func (g game) stream(out io.Writer) {
+	clBoard := clientBoard{board: g.board, expiresIn: g.limit}
+	if err := json.NewEncoder(out).Encode(clBoard); err != nil {
+		panic(err)
+	}
+}
+
 //every cell board has a byte witch identifies its content. It's defined by the following constants
 //I could've used a bitwise approach but this seems cleaner to the client.
 const ZeroAdjacentMines cellAttr = 0
@@ -41,7 +50,8 @@ const UnclearedAndMarked cellAttr = 10
 
 //this is the board sent to the client. it has no mines information to avoid cheating
 type clientBoard struct {
-	board map[string][][]cell
+	expiresIn time.Duration
+	board     gameGrid
 }
 
 func handleGameAction(w http.ResponseWriter, r *http.Request) error {
@@ -49,6 +59,7 @@ func handleGameAction(w http.ResponseWriter, r *http.Request) error {
 }
 
 func handleRestartAction(w http.ResponseWriter, r *http.Request) error {
+	getWebGame(w, r, true).stream(w)
 	return nil
 }
 

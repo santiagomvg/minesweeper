@@ -8,10 +8,10 @@ import (
 
 const gameCookieName string = "SV_minesweeper"
 
-func getWebGame(w http.ResponseWriter, r *http.Request) *game {
+func getWebGame(w http.ResponseWriter, r *http.Request, forceNew bool) *game {
 
 	c, err := r.Cookie(gameCookieName)
-	if err != nil || c == nil {
+	if forceNew || err != nil || c == nil {
 		return createNewWebGame(w, 10, 10, 3)
 	} else {
 
