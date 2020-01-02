@@ -1,20 +1,18 @@
 package main
 
 import (
+	"github.com/pborman/uuid"
 	"net/http"
 	"time"
 )
 
-func getWebGame(r *http.Request) *game {
+const gameCookieName string = "SV_minesweeper"
 
-	c, err := r.Cookie("SV_minesweeper")
+func getWebGame(w http.ResponseWriter, r *http.Request) *game {
+
+	c, err := r.Cookie(gameCookieName)
 	if err != nil || c == nil {
-		board := generateBoard(10, 10, 1)
-		return &game{
-			startTime: time.Now(),
-			limit:     time.Minute * 10,
-			board:     board,
-		}
+		return createNewWebGame(w, 10, 10, 3)
 	} else {
 
 		boardLock.RLock()
@@ -24,13 +22,31 @@ func getWebGame(r *http.Request) *game {
 		if exists {
 			return &bg
 		} else {
-			board := generateBoard(10, 10, 1)
-			return &game{
-				startTime: time.Now(),
-				limit:     time.Minute * 10,
-				board:     board,
-			}
+			return createNewWebGame(w, 10, 10, 3)
 		}
-
 	}
+}
+
+func createNewWebGame(w http.ResponseWriter, rows int, cols int, mines int) *game {
+
+	board := generateBoard(rows, cols, mines)
+	newGame := game{
+		startTime: time.Now(),
+		limit:     time.Minute * 10,
+		board:     board,
+	}
+
+	cookieValue := uuid.New()
+	expire := time.Now().AddDate(0, 0, 1)
+	cookie := http.Cookie{
+		Name:    gameCookieName,
+		Value:   cookieValue,
+		Expires: expire,
+	}
+	http.SetCookie(w, &cookie)
+
+	boardLock.Lock()
+	defer boardLock.Unlock()
+	gameBoards[cookieValue] = newGame
+	return &newGame
 }
