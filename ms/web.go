@@ -1,4 +1,4 @@
-package main
+package ms
 
 import (
 	"github.com/pborman/uuid"
@@ -29,11 +29,14 @@ func getWebGame(w http.ResponseWriter, r *http.Request, forceNew bool) *game {
 
 func createNewWebGame(w http.ResponseWriter, rows int, cols int, mines int) *game {
 
-	board := generateBoard(rows, cols, mines)
+	board, err := generateBoard(rows, cols, mines)
+	if err != nil {
+		panic(err)
+	}
 	newGame := game{
 		startTime: time.Now(),
 		limit:     time.Minute * 10,
-		board:     board,
+		board:     *board,
 	}
 
 	cookieValue := uuid.New()

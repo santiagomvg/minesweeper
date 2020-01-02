@@ -1,73 +1,36 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
+	_ "github.com/heroku/x/hmetrics/onload"
 	"log"
-	"net/http"
+	"minesweeper/ms"
+	"os"
 )
 
 func main() {
-	r := mux.NewRouter().StrictSlash(true)
-	r.Methods("POST").Path("/action").Handler(newEndpoint(handleGameAction))
-	r.Methods("POST").Path("/newGame").Handler(newEndpoint(handleRestartAction))
-	//	r.NotFoundHandler = notFoundHandler{}
-	if err := http.ListenAndServe(":8080", r); err != nil {
-		log.Fatal(err)
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		log.Fatal("$PORT must be set")
 	}
-	log.Println("ListenAndServe:8080")
-}
 
-type endpointFunc func(w http.ResponseWriter, r *http.Request) error
+	router := gin.New()
+	router.Use(gin.Logger())
+	//	router.LoadHTMLGlob("templates/*.tmpl.html")
+	router.Static("/static", "static")
 
-type ServiceAPIHandler struct {
-	serve endpointFunc
-}
-
-func (sah ServiceAPIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	h := w.Header()
-	h.Set("Content-Type", "application/json; charset=UTF-8")
-	h.Set("Cache-Control", "no-store")
-	h.Set("Pragma", "no-cache")
-
-	//panic handler
-	defer func() {
-		if r := recover(); r != nil {
-			handleError(w, r)
-		}
-	}()
-	if err := sah.serve(w, r); err != nil {
-		handleError(w, err)
-	}
-}
-
-func handleError(w http.ResponseWriter, err interface{}) {
-
-	w.WriteHeader(500)
-
-	type servicePanicError struct {
-		Status int    `json:"status"`
-		Error  string `json:"error"`
-	}
-	lErr := json.NewEncoder(w).Encode(&servicePanicError{
-		Status: 500,
-		Error:  fmt.Sprintf("fatal error - %v", err),
+	router.GET("/ping", func(c *gin.Context) {
+		c.Writer.Write([]byte("HI!"))
 	})
 
-	if lErr != nil {
-		log.Fatal(lErr)
-	}
+	router.GET("/action", func(c *gin.Context) {
+		ms.HandleGameAction(c.Writer, c.Request)
+	})
 
+	router.POST("/newGame", func(c *gin.Context) {
+		ms.HandleRestartAction(c.Writer, c.Request)
+	})
+
+	router.Run(":" + port)
 }
-
-func newEndpoint(f endpointFunc) http.Handler {
-	return ServiceAPIHandler{
-		serve: f,
-	}
-}
-
-type notFoundHandler struct{}
-
-func (h notFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {}

@@ -1,7 +1,8 @@
-package main
+package ms
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"math"
 	"math/rand"
@@ -39,11 +40,63 @@ func (g game) stream(out io.Writer) {
 	}
 }
 
-func (g game) clearCell(x int, y int) {
+func (g game) clearCell(row int, col int, userAction bool) {
 
-	if g.board[x][y].hasMine {
+	cell := &g.board[row][col]
+	if cell.flags == Uncleared && !cell.hasMine {
+
+		mines := g.getSurroundingMines(row, col)
+		cellFlags := &g.board[row][col].flags
+		switch mines {
+		case 0:
+			*cellFlags = ZeroAdjacentMines //no adjacent mines. let's keep cleaning
+			g.clearCell(row+1, col, false)
+			g.clearCell(row+1, col+1, false)
+			g.clearCell(row, col+1, false)
+			g.clearCell(row-1, col+1, false)
+			g.clearCell(row-1, col, false)
+			g.clearCell(row-1, col-1, false)
+			g.clearCell(row, col-1, false)
+			g.clearCell(row+1, col-1, false)
+
+		case 1:
+			*cellFlags = OneAdjacentMines
+		case 2:
+			*cellFlags = TwoAdjacentMines
+		case 3:
+			*cellFlags = ThreeAdjacentMines
+		case 4:
+			*cellFlags = FourAdjacentMines
+		case 5:
+			*cellFlags = FiveAdjacentMines
+		case 6:
+			*cellFlags = SixAdjacentMines
+		case 7:
+			*cellFlags = SevenAdjacentMines
+		case 8:
+			*cellFlags = EightAdjacentMines
+		}
+
+	} else if userAction && cell.hasMine {
 		g.endGame()
 	}
+}
+
+func (g game) getSurroundingMines(row int, col int) int {
+
+	count := 0
+	for y := row - 1; y <= row+1; y++ {
+		if y >= 0 && y < len(g.board) {
+			for x := col - 1; x <= col+1; x++ {
+				if x >= 0 && x < len(g.board[y]) {
+					if g.board[x][y].hasMine {
+						count++
+					}
+				}
+			}
+		}
+	}
+	return count
 }
 
 func (g game) endGame() {
@@ -51,14 +104,14 @@ func (g game) endGame() {
 	for _, row := range g.board {
 		for _, col := range row {
 			if col.hasMine {
-				col.flags = Mine
+				col.flags = Mine //display flag
 			}
 		}
 	}
 }
 
-func (g game) markCell(x int, y int) {
-	c := g.board[x][y]
+func (g game) markCell(row int, col int) {
+	c := g.board[row][col]
 	if c.flags == Uncleared {
 		c.flags = UnclearedAndMarked
 	} else if c.flags == UnclearedAndMarked {
@@ -87,7 +140,7 @@ type clientBoard struct {
 	board     gameGrid
 }
 
-func handleGameAction(w http.ResponseWriter, r *http.Request) error {
+func HandleGameAction(w http.ResponseWriter, r *http.Request) error {
 
 	g := getWebGame(w, r, false)
 
@@ -104,21 +157,21 @@ func handleGameAction(w http.ResponseWriter, r *http.Request) error {
 	case "mark":
 		g.markCell(data.row, data.col)
 	case "clear":
-		g.clearCell(data.row, data.col)
+		g.clearCell(data.row, data.col, true)
 	}
 	g.stream(w)
 	return nil
 }
 
-func handleRestartAction(w http.ResponseWriter, r *http.Request) error {
+func HandleRestartAction(w http.ResponseWriter, r *http.Request) error {
 	getWebGame(w, r, true).stream(w)
 	return nil
 }
 
-func generateBoard(rows int, cols int, mines int) gameGrid {
+func generateBoard(rows int, cols int, mines int) (*gameGrid, error) {
 
 	if rows <= 0 || cols <= 0 {
-		panic("grid dimensions must be positive.")
+		return nil, errors.New("invalid grid dimensions")
 	}
 	grid := make([][]cell, rows)
 	for r := 0; r < rows; r++ {
@@ -138,5 +191,6 @@ func generateBoard(rows int, cols int, mines int) gameGrid {
 			grid[x][y].hasMine = true
 		}
 	}
-	return gameGrid(grid)
+	ret := gameGrid(grid)
+	return &ret, nil
 }
