@@ -9,6 +9,7 @@ import (
 )
 
 //every game board has a browser's key cookie associated. This is the in-memory persistence and its synchronized by boardLock
+type gameGrid [][]cell
 type cellAttr byte
 
 var gameBoards map[string]game
@@ -20,7 +21,8 @@ type cell struct {
 }
 type game struct {
 	startTime time.Time
-	board     [][]cell
+	limit     time.Duration
+	board     gameGrid
 }
 
 //every cell board has a byte witch identifies its content. It's defined by the following constants
@@ -50,7 +52,7 @@ func handleRestartAction(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func generateBoard(rows int, cols int, mines int) {
+func generateBoard(rows int, cols int, mines int) gameGrid {
 
 	if rows <= 0 || cols <= 0 {
 		panic("grid dimensions must be positive.")
@@ -73,4 +75,5 @@ func generateBoard(rows int, cols int, mines int) {
 			grid[x][y].hasMine = true
 		}
 	}
+	return gameGrid(grid)
 }
