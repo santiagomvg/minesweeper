@@ -38,6 +38,19 @@ func (g game) stream(out io.Writer) {
 	}
 }
 
+func (g game) clearCell(x int, y int) {
+
+}
+
+func (g game) markCell(x int, y int) {
+	c := g.board[x][y]
+	if c.flags == Uncleared {
+		c.flags = UnclearedAndMarked
+	} else if c.flags == UnclearedAndMarked {
+		c.flags = Uncleared
+	}
+}
+
 //every cell board has a byte witch identifies its content. It's defined by the following constants
 //I could've used a bitwise approach but this seems cleaner to the client.
 const ZeroAdjacentMines cellAttr = 0
@@ -59,6 +72,25 @@ type clientBoard struct {
 }
 
 func handleGameAction(w http.ResponseWriter, r *http.Request) error {
+
+	g := getWebGame(w, r, false)
+
+	var data inputData
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		return err
+	}
+
+	if err := data.action.validate(); err != nil {
+		return err
+	}
+
+	switch data.action {
+	case "mark":
+		g.markCell(data.row, data.col)
+	case "clear":
+		g.clearCell(data.row, data.col)
+	}
+	g.stream(w)
 	return nil
 }
 
