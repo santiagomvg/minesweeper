@@ -11,7 +11,7 @@ import (
 func main() {
 	r := mux.NewRouter().StrictSlash(true)
 	r.Methods("POST").Path("/action").Handler(newEndpoint(handleGameAction))
-	r.Methods("POST").Path("/newGame").Handler(newEndpoint(handleNewAction))
+	r.Methods("POST").Path("/newGame").Handler(newEndpoint(handleRestartAction))
 	//	r.NotFoundHandler = notFoundHandler{}
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		log.Fatal(err)
