@@ -2,9 +2,8 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/heroku/go-getting-started/ms"
-	_ "github.com/heroku/x/hmetrics/onload"
 	"log"
+	"minesweeper/ms"
 	"os"
 )
 
