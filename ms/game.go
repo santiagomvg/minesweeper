@@ -111,7 +111,7 @@ func (g game) endGame() {
 }
 
 func (g game) markCell(row int, col int) {
-	c := g.board[row][col]
+	c := &g.board[row][col]
 	if c.Flags == Uncleared {
 		c.Flags = UnclearedAndMarked
 	} else if c.Flags == UnclearedAndMarked {
