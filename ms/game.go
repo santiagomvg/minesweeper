@@ -19,8 +19,8 @@ var gameBoards map[string]game
 var boardLock sync.RWMutex
 
 type cell struct {
-	hasMine bool
-	flags   cellAttr
+	HasMine bool     `json:"hasMine"`
+	Flags   cellAttr `json:"flags"`
 }
 type game struct {
 	startTime time.Time
@@ -34,8 +34,8 @@ func (g game) isValid() bool {
 }
 
 func (g game) stream(out io.Writer) {
-	clBoard := clientBoard{board: g.board, expiresIn: g.limit}
-	if err := json.NewEncoder(out).Encode(clBoard); err != nil {
+	clBoard := clientBoard{Board: g.board, ExpiresIn: g.limit}
+	if err := json.NewEncoder(out).Encode(&clBoard); err != nil {
 		panic(err)
 	}
 }
@@ -43,10 +43,10 @@ func (g game) stream(out io.Writer) {
 func (g game) clearCell(row int, col int, userAction bool) {
 
 	cell := &g.board[row][col]
-	if cell.flags == Uncleared && !cell.hasMine {
+	if cell.Flags == Uncleared && !cell.HasMine {
 
 		mines := g.getSurroundingMines(row, col)
-		cellFlags := &g.board[row][col].flags
+		cellFlags := &g.board[row][col].Flags
 		switch mines {
 		case 0:
 			*cellFlags = ZeroAdjacentMines //no adjacent mines. let's keep cleaning
@@ -77,7 +77,7 @@ func (g game) clearCell(row int, col int, userAction bool) {
 			*cellFlags = EightAdjacentMines
 		}
 
-	} else if userAction && cell.hasMine {
+	} else if userAction && cell.HasMine {
 		g.endGame()
 	}
 }
@@ -89,7 +89,7 @@ func (g game) getSurroundingMines(row int, col int) int {
 		if y >= 0 && y < len(g.board) {
 			for x := col - 1; x <= col+1; x++ {
 				if x >= 0 && x < len(g.board[y]) {
-					if g.board[x][y].hasMine {
+					if g.board[x][y].HasMine {
 						count++
 					}
 				}
@@ -103,8 +103,8 @@ func (g game) endGame() {
 	g.gameOver = true
 	for _, row := range g.board {
 		for _, col := range row {
-			if col.hasMine {
-				col.flags = Mine //display flag
+			if col.HasMine {
+				col.Flags = Mine //display flag
 			}
 		}
 	}
@@ -112,10 +112,10 @@ func (g game) endGame() {
 
 func (g game) markCell(row int, col int) {
 	c := g.board[row][col]
-	if c.flags == Uncleared {
-		c.flags = UnclearedAndMarked
-	} else if c.flags == UnclearedAndMarked {
-		c.flags = Uncleared
+	if c.Flags == Uncleared {
+		c.Flags = UnclearedAndMarked
+	} else if c.Flags == UnclearedAndMarked {
+		c.Flags = Uncleared
 	}
 }
 
@@ -136,8 +136,8 @@ const Mine cellAttr = 11 //for GameOver display
 
 //this is the board sent to the client. it has no mines information to avoid cheating
 type clientBoard struct {
-	expiresIn time.Duration
-	board     gameGrid
+	ExpiresIn time.Duration `json:"expiresIn"`
+	Board     gameGrid      `json:"board"`
 }
 
 func Init() {
@@ -183,7 +183,7 @@ func generateBoard(rows int, cols int, mines int) (*gameGrid, error) {
 	for r := 0; r < rows; r++ {
 		grid[r] = make([]cell, cols)
 		for c := 0; c < cols; c++ {
-			grid[r][c].flags = Uncleared
+			grid[r][c].Flags = Uncleared
 		}
 	}
 	min := int(math.Round(float64(rows*cols) * 0.1))
@@ -192,9 +192,9 @@ func generateBoard(rows int, cols int, mines int) (*gameGrid, error) {
 	rm := mineCount
 	for rm > 0 {
 		x, y := rand.Intn(rows), rand.Intn(cols)
-		if !grid[x][y].hasMine {
+		if !grid[x][y].HasMine {
 			rm--
-			grid[x][y].hasMine = true
+			grid[x][y].HasMine = true
 		}
 	}
 	ret := gameGrid(grid)
