@@ -140,8 +140,13 @@ type clientBoard struct {
 	board     gameGrid
 }
 
+func Init() {
+	gameBoards = make(map[string]game)
+}
+
 func HandleGameAction(w http.ResponseWriter, r *http.Request) error {
 
+	defer r.Body.Close()
 	g := getWebGame(w, r, false)
 
 	var data inputData
@@ -149,21 +154,22 @@ func HandleGameAction(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if err := data.action.validate(); err != nil {
+	if err := data.Action.validate(); err != nil {
 		return err
 	}
 
-	switch data.action {
+	switch data.Action {
 	case "mark":
-		g.markCell(data.row, data.col)
+		g.markCell(data.Row, data.Col)
 	case "clear":
-		g.clearCell(data.row, data.col, true)
+		g.clearCell(data.Row, data.Col, true)
 	}
 	g.stream(w)
 	return nil
 }
 
 func HandleRestartAction(w http.ResponseWriter, r *http.Request) error {
+	defer r.Body.Close()
 	getWebGame(w, r, true).stream(w)
 	return nil
 }

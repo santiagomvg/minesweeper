@@ -20,7 +20,7 @@ func (ga gameAction) validate() error {
 
 //json data sent by client API
 type inputData struct {
-	action gameAction
-	row    int
-	col    int
+	Action gameAction `json:"action"`
+	Row    int        `json:"row"`
+	Col    int        `json:"col"`
 }

@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/heroku/go-getting-started/ms"
 	_ "github.com/heroku/x/hmetrics/onload"
 	"log"
-	"minesweeper/ms"
 	"os"
 )
 
@@ -14,6 +14,7 @@ func main() {
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
+	ms.Init()
 
 	router := gin.New()
 	router.Use(gin.Logger())
@@ -24,7 +25,7 @@ func main() {
 		c.Writer.Write([]byte("HI!"))
 	})
 
-	router.GET("/action", func(c *gin.Context) {
+	router.POST("/action", func(c *gin.Context) {
 		ms.HandleGameAction(c.Writer, c.Request)
 	})
 
