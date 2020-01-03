@@ -27,7 +27,7 @@ MineSW.prototype.startGame = function(rowCount, colCount) {
         type: "POST",
         url: "/newGame",
         data: { row: rowCount, col: colCount },
-        success: self._processBoard
+        success: function(data) { self._processBoard(data); }
     });
 };
 
@@ -38,7 +38,7 @@ MineSW.prototype._doAction = function(action, row, col) {
         type: "POST",
         url: "/action",
         data: { action: action, row: row, col: col },
-        success: self._processBoard()
+        success: function(data) { self._processBoard(data); }
     });
 };
 
