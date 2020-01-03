@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"minesweeper/ms"
+	"net/http"
 	"os"
 )
 
@@ -17,11 +18,15 @@ func main() {
 
 	router := gin.New()
 	router.Use(gin.Logger())
-	//	router.LoadHTMLGlob("templates/*.tmpl.html")
+	router.LoadHTMLGlob("templates/*.html")
 	router.Static("/static", "static")
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.Writer.Write([]byte("HI!"))
+	})
+
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
 	router.POST("/action", func(c *gin.Context) {
