@@ -29,18 +29,18 @@ type game struct {
 	gameOver  bool
 }
 
-func (g game) isValid() bool {
+func (g *game) isValid() bool {
 	return g.startTime.Add(g.limit).After(time.Now())
 }
 
-func (g game) stream(out io.Writer) {
+func (g *game) stream(out io.Writer) {
 	clBoard := clientBoard{Board: g.board, ExpiresIn: g.limit}
 	if err := json.NewEncoder(out).Encode(&clBoard); err != nil {
 		panic(err)
 	}
 }
 
-func (g game) clearCell(row int, col int, userAction bool) {
+func (g *game) clearCell(row int, col int, userAction bool) {
 
 	cell := &g.board[row][col]
 	if cell.Flags == Uncleared && !cell.HasMine {
@@ -82,7 +82,7 @@ func (g game) clearCell(row int, col int, userAction bool) {
 	}
 }
 
-func (g game) getSurroundingMines(row int, col int) int {
+func (g *game) getSurroundingMines(row int, col int) int {
 
 	count := 0
 	for y := row - 1; y <= row+1; y++ {
@@ -99,18 +99,18 @@ func (g game) getSurroundingMines(row int, col int) int {
 	return count
 }
 
-func (g game) endGame() {
+func (g *game) endGame() {
 	g.gameOver = true
-	for _, row := range g.board {
-		for _, col := range row {
-			if col.HasMine {
-				col.Flags = Mine //display flag
+	for i := 0; i < len(g.board); i++ {
+		for j := 0; j < len(g.board[i]); j++ {
+			if g.board[i][j].HasMine {
+				g.board[i][j].Flags = Mine //display flag
 			}
 		}
 	}
 }
 
-func (g game) markCell(row int, col int) {
+func (g *game) markCell(row int, col int) {
 	c := &g.board[row][col]
 	if c.Flags == Uncleared {
 		c.Flags = UnclearedAndMarked
