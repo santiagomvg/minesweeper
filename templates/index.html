@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Minesweeper Demo</title>
+    <!--suppress JSUnresolvedLibraryURL -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body>
+
+    <h1>Minesweeper demo - Santiago Vidal 2020</h1>
+    <p>Left click: clears cell</p>
+    <p>Right click: marks cell</p>
+
+    <label for="cols">Columns</label><input type="text" id="cols" value="10"/>
+    <label for="rows">Rows</label><input type="text" id="rows" value="10"/>
+    <input type="button" onclick="doStartGame()" value="Start Game"/>
+
+
+    <div id="board"></div>
+
+    <script>
+        var ms = new MineSW();
+        ms.setRenderCallback(renderBoard);
+        function doStartGame() {
+            ms.startGame($('#rows').value, $('#cols').value);
+        }
+
+        function renderBoard(b) {
+            alert('board: ' + b);
+        }
+
+    </script>
+</body>
+</html>
