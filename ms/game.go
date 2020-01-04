@@ -35,6 +35,7 @@ func (g *game) isValid() bool {
 
 func (g *game) stream(out io.Writer) {
 	clBoard := clientBoard{Board: g.board, ExpiresIn: g.limit}
+	clBoard.checkWinner()
 	if err := json.NewEncoder(out).Encode(&clBoard); err != nil {
 		panic(err)
 	}
@@ -143,6 +144,33 @@ const Mine cellAttr = 11 //for GameOver display
 type clientBoard struct {
 	ExpiresIn time.Duration `json:"expiresIn"`
 	Board     gameGrid      `json:"board"`
+	Winner    bool          `json:"winner"`
+}
+
+func (cb *clientBoard) checkWinner() {
+
+	minesTagged := 0
+	mines := 0
+	for _, row := range cb.Board {
+
+		for _, col := range row {
+
+			if col.Flags == Uncleared {
+				return
+			}
+
+			if col.Flags == UnclearedAndMarked {
+				minesTagged++
+			}
+
+			if col.HasMine {
+				mines++
+			}
+		}
+	}
+	if mines == minesTagged {
+		cb.Winner = true
+	}
 }
 
 func Init() {

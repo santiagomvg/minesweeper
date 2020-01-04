@@ -93,7 +93,10 @@
 
             if(gameover) {
                 setTimeout(function() { alert('kabooom! game over'); }, 100);
+            } else if(data.winner) {
+                setTimeout(function() { alert('you won!'); }, 100);
             }
+
         }
 
     </script>
