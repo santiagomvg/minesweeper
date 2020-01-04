@@ -77,7 +77,7 @@
                             gameover = true; //if server sent mines then you've losed
                             break;
                     }
-                    if($('#debug')[0].checked && row[x].hasMine) { //debug code
+                    if($('#debug')[0].checked && row[x].hasMine && cell !== '?') { //debug code
                         td.classList.add('debugMine');
                         cell = '#';
                     }

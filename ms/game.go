@@ -42,6 +42,11 @@ func (g *game) stream(out io.Writer) {
 
 func (g *game) clearCell(row int, col int, userAction bool) {
 
+	//this func is called recursively to check surroundings so row/col could be out of range
+	if (row < 0 || row >= len(g.board)) || (col < 0 || col >= len(g.board)) {
+		return
+	}
+
 	cell := &g.board[row][col]
 	if cell.Flags == Uncleared && !cell.HasMine {
 
@@ -89,7 +94,7 @@ func (g *game) getSurroundingMines(row int, col int) int {
 		if y >= 0 && y < len(g.board) {
 			for x := col - 1; x <= col+1; x++ {
 				if x >= 0 && x < len(g.board[y]) {
-					if g.board[x][y].HasMine {
+					if g.board[y][x].HasMine {
 						count++
 					}
 				}
