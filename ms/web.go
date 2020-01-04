@@ -1,6 +1,7 @@
 package ms
 
 import (
+	"encoding/json"
 	"github.com/pborman/uuid"
 	"net/http"
 	"time"
@@ -8,11 +9,24 @@ import (
 
 const gameCookieName string = "SV_minesweeper"
 
+type initData struct {
+	Row int `json:"row"`
+	Col int `json:"col"`
+}
+
 func getWebGame(w http.ResponseWriter, r *http.Request, forceNew bool) *game {
+
+	var input initData
+	if forceNew {
+		json.NewDecoder(r.Body).Decode(&input)
+	} else {
+		input.Col = 10
+		input.Row = 10
+	}
 
 	c, err := r.Cookie(gameCookieName)
 	if forceNew || err != nil || c == nil {
-		return createNewWebGame(w, 10, 10, 3)
+		return createNewWebGame(w, input.Row, input.Col, 3)
 	} else {
 
 		boardLock.RLock()
@@ -22,7 +36,7 @@ func getWebGame(w http.ResponseWriter, r *http.Request, forceNew bool) *game {
 		if exists && bg.isValid() {
 			return &bg
 		} else {
-			return createNewWebGame(w, 10, 10, 3)
+			return createNewWebGame(w, input.Row, input.Col, 3)
 		}
 	}
 }

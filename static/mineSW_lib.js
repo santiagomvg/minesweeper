@@ -39,7 +39,7 @@ MineSW.prototype.startGame = function(rowCount, colCount) {
     $.ajax({
         type: "POST",
         url: "/newGame",
-        data: JSON.stringify({ row: rowCount, col: colCount }),
+        data: JSON.stringify({ row: parseInt(rowCount), col: parseInt(colCount) }),
         contentType : 'application/json',
         success: function(data) { self._processBoard(data); }
     });

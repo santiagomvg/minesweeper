@@ -26,7 +26,7 @@
         var ms = new MineSW();
         ms.setRenderCallback(renderBoard);
         function doStartGame() {
-            ms.startGame($('#rows').value, $('#cols').value);
+            ms.startGame($('#rows')[0].value, $('#cols')[0].value);
         }
 
         function doClearCell(elem) {

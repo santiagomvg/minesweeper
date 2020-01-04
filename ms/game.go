@@ -44,7 +44,7 @@ func (g *game) stream(out io.Writer) {
 func (g *game) clearCell(row int, col int, userAction bool) {
 
 	//this func is called recursively to check surroundings so row/col could be out of range
-	if (row < 0 || row >= len(g.board)) || (col < 0 || col >= len(g.board)) {
+	if (row < 0 || row >= len(g.board)) || (col < 0 || col >= len(g.board[row])) {
 		return
 	}
 
