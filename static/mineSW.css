@@ -1,0 +1,11 @@
+#board {
+    padding: 30px;
+}
+
+#board td {
+    width: 5px;
+    height: 5px;
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+}

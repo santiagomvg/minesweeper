@@ -6,6 +6,7 @@
     <!--suppress JSUnresolvedLibraryURL -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="/static/mineSW_lib.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/mineSW.css">
 </head>
 <body>
 
@@ -33,6 +34,7 @@
 
         function doMarkCell(elem) {
             ms.markCell(this.row, this.col);
+            return false;
         }
 
         function renderBoard(data) {
@@ -58,13 +60,13 @@
 
                         case Uncleared: cell = '.'; break;
                         case UnclearedAndMarked: cell = '?'; break;
-                        case ZeroAdjacentMines: cell = ' '; break;
-                        case OneAdjacentMines: cell = '1'; break;
-                        case TwoAdjacentMines: cell = '2'; break;
+                        case ZeroAdjacentMines: cell  = ' '; break;
+                        case OneAdjacentMines: cell   = '1'; break;
+                        case TwoAdjacentMines: cell   = '2'; break;
                         case ThreeAdjacentMines: cell = '3'; break;
-                        case FourAdjacentMines: cell = '4'; break;
-                        case FiveAdjacentMines: cell = '5'; break;
-                        case SixAdjacentMines: cell = '6'; break;
+                        case FourAdjacentMines: cell  = '4'; break;
+                        case FiveAdjacentMines: cell  = '5'; break;
+                        case SixAdjacentMines: cell   = '6'; break;
                         case SevenAdjacentMines: cell = '7'; break;
                         case EightAdjacentMines: cell = '8'; break;
                         case Mine: cell = '*'; break;
