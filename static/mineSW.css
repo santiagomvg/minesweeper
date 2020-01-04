@@ -9,3 +9,7 @@
     cursor: pointer;
     padding: 10px;
 }
+
+.debugMine {
+    color: red;
+}

@@ -14,6 +14,7 @@
     <p>Left click: clears cell</p>
     <p>Right click: marks cell</p>
 
+    <label for="debug">Debug Mode</label><input type="checkbox" id="debug"/>
     <label for="cols">Columns</label><input type="text" id="cols" value="10"/>
     <label for="rows">Rows</label><input type="text" id="rows" value="10"/>
     <input type="button" onclick="doStartGame()" value="Start Game"/>
@@ -39,6 +40,7 @@
 
         function renderBoard(data) {
 
+            var gameover = false;
             var board = data.board;
             var table = document.createElement('table');
 
@@ -55,6 +57,7 @@
                     td.onclick = doClearCell;
                     td.oncontextmenu = doMarkCell;
 
+
                     var cell;
                     switch(row[x].flags) {
 
@@ -69,7 +72,14 @@
                         case SixAdjacentMines: cell   = '6'; break;
                         case SevenAdjacentMines: cell = '7'; break;
                         case EightAdjacentMines: cell = '8'; break;
-                        case Mine: cell = '*'; break;
+                        case Mine:
+                            cell = '*';
+                            gameover = true; //if server sent mines then you've losed
+                            break;
+                    }
+                    if($('#debug')[0].checked && row[x].hasMine) { //debug code
+                        td.classList.add('debugMine');
+                        cell = '#';
                     }
                     td.innerHTML = cell;
                     tr.appendChild(td);
@@ -80,6 +90,10 @@
             var htmlBoard = document.getElementById('board');
             htmlBoard.innerHTML = '';
             htmlBoard.appendChild(table);
+
+            if(gameover) {
+                setTimeout(function() { alert('kabooom! game over'); }, 100);
+            }
         }
 
     </script>
